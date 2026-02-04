@@ -1,13 +1,20 @@
-﻿using Discord;
+﻿using Bot.Extensions;
+using Bot.Handlers;
+using Bot.Interfaces;
+using Bot.Services;
+using Discord;
+using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 
-public class Program
+namespace Bot;
+public static class Program
 {
     private static IServiceProvider? _serviceProvider;
     static IServiceProvider CreateProvider()
     {
-        var config = new DiscordSocketConfig
+        // TODO: maybe set these up with global config
+        var clientConfig = new DiscordSocketConfig
         {
             GatewayIntents = GatewayIntents.Guilds |
                              GatewayIntents.GuildMessages |
@@ -15,13 +22,16 @@ public class Program
                              GatewayIntents.GuildMembers,
             MessageCacheSize = 500
         };
+        var interactionConfig = new InteractionServiceConfig()
+        {
+            LogLevel = LogSeverity.Info,
+        };
         var services = new ServiceCollection()
-            .AddSingleton(config)
+            .AddSingleton(clientConfig)
             .AddSingleton<DiscordSocketClient>()
-            .AddSingleton<LoggingService>()
-            .AddSingleton<ReadyHandler>()
-            .AddSingleton<MessageUpdatesHandler>()
-            .AddSingleton<MessageRecievedHandler>();
+            .AddSingleton(interactionConfig)
+            .AddBotServices()
+            .AddBotHandlers();
 
         return services.BuildServiceProvider();
     }
@@ -30,20 +40,8 @@ public class Program
     {
         _serviceProvider = CreateProvider();
 
-        // Load credentials
-        DotNetEnv.Env.Load();
-        var token = DotNetEnv.Env.GetString("DISCORD_TOKEN_DEV");
-
-        // Activate services that need to start immediately
-        var client = _serviceProvider.GetRequiredService<DiscordSocketClient>();
-        _serviceProvider.GetRequiredService<LoggingService>();
-        _serviceProvider.GetRequiredService<ReadyHandler>();
-        _serviceProvider.GetRequiredService<MessageUpdatesHandler>();
-        _serviceProvider.GetRequiredService<MessageRecievedHandler>();
-
-        // Login and start Discord bot
-        await client.LoginAsync(TokenType.Bot, token);
-        await client.StartAsync();
+        var bot = _serviceProvider.GetRequiredService<DiscordBotService>();
+        await bot.StartAsync();
 
         // Keep running
         await Task.Delay(-1);

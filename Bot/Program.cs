@@ -1,6 +1,4 @@
 ﻿using Bot.Extensions;
-using Bot.Handlers;
-using Bot.Interfaces;
 using Bot.Services;
 using Discord;
 using Discord.Interactions;

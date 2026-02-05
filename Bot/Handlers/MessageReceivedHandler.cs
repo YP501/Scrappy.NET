@@ -19,6 +19,8 @@ public class MessageReceivedHandler : IEventHandler
 
     private Task OnMessageReceived(SocketMessage msg)
     {
+        if (msg.Author.Id == _client.CurrentUser.Id) return  Task.CompletedTask; // Stop if its own message
+        
         Console.WriteLine(msg.CleanContent);
         return Task.CompletedTask;
     }

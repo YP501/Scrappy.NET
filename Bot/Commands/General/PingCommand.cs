@@ -1,18 +1,18 @@
 using Discord;
 using Discord.Interactions;
 
-namespace Bot.Commands;
+namespace Bot.Commands.General;
 
 public class PingCommand : InteractionModuleBase<SocketInteractionContext>
 {
     [SlashCommand("ping", "Check the bot's latency")]
-    public async Task HandleCommand()
+    public async Task ExecuteAsync()
     {
-        var latency = Context.Client.Latency;
+        int latency = Context.Client.Latency;
 
         var embed = new EmbedBuilder()
             .WithTitle("Pong! 🏓")
-            .WithDescription($"The bot latency is **{latency}ms**")
+            .WithDescription($"The bot's latency is **{latency}ms**")
             .WithColor(Color.Purple)
             .WithCurrentTimestamp()
             .Build();

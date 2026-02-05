@@ -5,13 +5,20 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Version>1.0.0-alpha</Version>
+    <Authors>YP501</Authors>
+    <Title>Scrappy.NET</Title>
+    <Description>A rewrite of Scrappy bot in C#</Description>
+    <PackageLicenseUrl>https://github.com/YP501/Scrappy.NET/blob/main/LICENSE</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/YP501/Scrappy.NET</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Discord.Net" Version="3.18.0" />
     <PackageReference Include="DotNetEnv" Version="3.1.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.2" />
   </ItemGroup>
 
 </Project>

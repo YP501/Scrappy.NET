@@ -17,6 +17,8 @@ public static class ServiceExtension
         ));
         services.AddSingleton<LoggingService>();
         services.AddSingleton<DiscordBotService>();
+        services.AddHttpClient();
+        services.AddMemoryCache();
 
         return services;
     }

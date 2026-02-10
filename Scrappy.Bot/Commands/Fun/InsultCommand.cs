@@ -1,7 +1,7 @@
 using System.Text.Json.Nodes;
 using Discord.Interactions;
 
-namespace Bot.Commands.Fun;
+namespace Scrappy.Bot.Commands.Fun;
 
 public class InsultCommand : InteractionModuleBase<SocketInteractionContext>
 {

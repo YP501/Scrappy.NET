@@ -1,11 +1,11 @@
-using Bot.Handlers;
-using Bot.Interfaces;
-using Bot.Services;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using Scrappy.Bot.Handlers;
+using Scrappy.Bot.Services;
+using Scrappy.Core.Interfaces;
 
-namespace Bot.Extensions;
+namespace Scrappy.Bot.Extensions;
 
 public static class ServiceExtension
 {

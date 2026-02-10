@@ -1,10 +1,8 @@
-using System.Net.Http.Json;
 using System.Text.Json.Nodes;
-using System.Text.Json.Serialization;
 using Discord;
 using Discord.Interactions;
 
-namespace Bot.Commands.Fun;
+namespace Scrappy.Bot.Commands.Fun;
 
 public class EightballCommand : InteractionModuleBase<SocketInteractionContext>
 {
@@ -34,8 +32,7 @@ public class EightballCommand : InteractionModuleBase<SocketInteractionContext>
             .WithDescription($"❓ Question: {question}\n🎱 Answer: {answer}")
             .WithColor(Color.Purple)
             .Build();
-
-        // await ModifyOriginalResponseAsync(props => props.Embed = embed);
+        
         await FollowupAsync(embed: embed);
     }
 }

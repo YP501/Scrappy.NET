@@ -1,10 +1,10 @@
-using Bot.Interfaces;
+using Scrappy.Core.Interfaces;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace Bot.Handlers;
+namespace Scrappy.Bot.Handlers;
 
 public class InteractionHandler : IEventHandler
 {

@@ -21,4 +21,9 @@
     <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Scrappy.Data\Scrappy.Data.csproj" />
+    <ProjectReference Include="..\Scrappy.Core\Scrappy.Core.csproj" />
+  </ItemGroup>
+
 </Project>

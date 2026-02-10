@@ -1,10 +1,8 @@
-using System.Reflection;
-using Bot.Interfaces;
 using Discord;
-using Discord.Interactions;
 using Discord.WebSocket;
+using Scrappy.Core.Interfaces;
 
-namespace Bot.Services;
+namespace Scrappy.Bot.Services;
 
 public class DiscordBotService
 {

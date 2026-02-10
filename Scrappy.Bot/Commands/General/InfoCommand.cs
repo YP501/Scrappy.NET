@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using Discord;
 using Discord.Interactions;
 
-namespace Bot.Commands.General;
+namespace Scrappy.Bot.Commands.General;
 
 public class InfoCommand : InteractionModuleBase<SocketInteractionContext>
 {

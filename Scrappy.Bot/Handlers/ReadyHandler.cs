@@ -1,11 +1,11 @@
 using System.Reflection;
-using Bot.Interfaces;
-using Bot.Services;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using Scrappy.Bot.Services;
+using Scrappy.Core.Interfaces;
 
-namespace Bot.Handlers;
+namespace Scrappy.Bot.Handlers;
 
 public class ReadyHandler : IEventHandler
 {

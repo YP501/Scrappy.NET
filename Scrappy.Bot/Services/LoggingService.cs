@@ -3,7 +3,7 @@ using Discord.Commands;
 using Discord.Interactions;
 using Discord.WebSocket;
 
-namespace Bot.Services;
+namespace Scrappy.Bot.Services;
 
 public class LoggingService
 {

@@ -1,11 +1,11 @@
-﻿using Bot.Extensions;
-using Bot.Services;
+﻿using Scrappy.Bot.Extensions;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using Scrappy.Bot.Services;
 
-namespace Bot;
+namespace Scrappy.Bot;
 public static class Program
 {
     private static IServiceProvider? _serviceProvider;

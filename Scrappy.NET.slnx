@@ -1,3 +1,5 @@
 <Solution>
-  <Project Path="Bot/Bot.csproj" />
+  <Project Path="Scrappy.Bot\Scrappy.Bot.csproj" />
+  <Project Path="Scrappy.Core/Scrappy.Core.csproj" />
+  <Project Path="Scrappy.Data/Scrappy.Data.csproj" />
 </Solution>

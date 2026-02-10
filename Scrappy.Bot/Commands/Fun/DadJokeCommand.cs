@@ -2,7 +2,7 @@ using System.Text.Json.Nodes;
 using Discord;
 using Discord.Interactions;
 
-namespace Bot.Commands.Fun;
+namespace Scrappy.Bot.Commands.Fun;
 
 public class DadJokeCommand : InteractionModuleBase<SocketInteractionContext>
 {

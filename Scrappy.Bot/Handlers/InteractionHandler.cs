@@ -1,8 +1,8 @@
-using Scrappy.Core.Interfaces;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Caching.Memory;
+using Scrappy.Bot.Interfaces;
 
 namespace Scrappy.Bot.Handlers;
 

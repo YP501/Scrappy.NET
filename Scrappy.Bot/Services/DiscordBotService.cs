@@ -1,6 +1,6 @@
 using Discord;
 using Discord.WebSocket;
-using Scrappy.Core.Interfaces;
+using Scrappy.Bot.Interfaces;
 
 namespace Scrappy.Bot.Services;
 
@@ -27,8 +27,7 @@ public class DiscordBotService
         }
         
         // Login and start bot
-        DotNetEnv.Env.TraversePath().Load();
-        await _client.LoginAsync(TokenType.Bot, DotNetEnv.Env.GetString("DISCORD_TOKEN_DEV"));
+        await _client.LoginAsync(TokenType.Bot, DotNetEnv.Env.GetString("DISCORD_TOKEN"));
         await _client.StartAsync();
     }
 }

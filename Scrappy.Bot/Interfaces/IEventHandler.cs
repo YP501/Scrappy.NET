@@ -1,4 +1,4 @@
-namespace Scrappy.Core.Interfaces;
+namespace Scrappy.Bot.Interfaces;
 
 public interface IEventHandler
 {

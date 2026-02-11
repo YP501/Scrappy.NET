@@ -2,8 +2,10 @@
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Scrappy.Bot.Services;
+using Scrappy.Data;
 
 namespace Scrappy.Bot;
 public static class Program
@@ -24,10 +26,15 @@ public static class Program
         {
             LogLevel = LogSeverity.Info,
         };
+        var connectionString = DotNetEnv.Env.GetString("DB_CONNECTION_STRING");
         var services = new ServiceCollection()
             .AddSingleton(clientConfig)
             .AddSingleton<DiscordSocketClient>()
             .AddSingleton(interactionConfig)
+            .AddDbContext<ScrappyDbContext>(options =>
+            {
+                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+            })
             .AddBotServices()
             .AddBotHandlers();
 
@@ -36,8 +43,15 @@ public static class Program
 
     public static async Task Main()
     {
+        DotNetEnv.Env.TraversePath().Load();
         _serviceProvider = CreateProvider();
 
+        // Load database
+        using var scope = _serviceProvider.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ScrappyDbContext>();
+        await db.Database.MigrateAsync();
+        
+        // Start bot
         var bot = _serviceProvider.GetRequiredService<DiscordBotService>();
         await bot.StartAsync();
 

@@ -2,8 +2,8 @@ using System.Reflection;
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using Scrappy.Bot.Interfaces;
 using Scrappy.Bot.Services;
-using Scrappy.Core.Interfaces;
 
 namespace Scrappy.Bot.Handlers;
 

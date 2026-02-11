@@ -1,6 +1,6 @@
 using Discord;
 using Discord.WebSocket;
-using Scrappy.Core.Interfaces;
+using Scrappy.Bot.Interfaces;
 
 namespace Scrappy.Bot.Handlers;
 public class MessageReceivedHandler : IEventHandler

@@ -2,6 +2,7 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
 using Scrappy.Bot.Interfaces;
 
 namespace Scrappy.Bot.Handlers;
@@ -31,16 +32,15 @@ public class InteractionHandler : IEventHandler
 
     private async Task HandleInteractionCreated(SocketInteraction interaction)
     {
-        var context = new SocketInteractionContext(_client, interaction);
-
-        if (interaction is SocketSlashCommand && IsOnCooldown(context.User.Id))
+        if (interaction is SocketSlashCommand && IsOnCooldown(interaction.User.Id))
         {
             
             // TODO: turn this in an embed and get cooldown time from global settings
             await interaction.RespondAsync("Slow down! You can only run a command every 3 seconds");
             return;
         }
-
+        
+        var context = new SocketInteractionContext(_client, interaction);
         await _interactions.ExecuteCommandAsync(context, _services);
     }
 

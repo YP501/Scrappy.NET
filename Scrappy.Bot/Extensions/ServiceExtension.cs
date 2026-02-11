@@ -4,6 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Scrappy.Bot.Handlers;
 using Scrappy.Bot.Interfaces;
 using Scrappy.Bot.Services;
+using Scrappy.Data.Interfaces;
+using Scrappy.Data.Repositories;
 
 namespace Scrappy.Bot.Extensions;
 
@@ -29,6 +31,13 @@ public static class ServiceExtension
         services.AddSingleton<IEventHandler, MessageUpdatesHandler>();
         services.AddSingleton<IEventHandler, MessageReceivedHandler>();
         services.AddSingleton<IEventHandler, InteractionHandler>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddRepositories(this IServiceCollection services)
+    {
+        services.AddScoped<IInfractionRepository, InfractionRepository>();
 
         return services;
     }

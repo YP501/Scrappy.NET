@@ -26,17 +26,18 @@ public static class Program
         {
             LogLevel = LogSeverity.Info,
         };
-        var connectionString = DotNetEnv.Env.GetString("DB_CONNECTION_STRING");
         var services = new ServiceCollection()
             .AddSingleton(clientConfig)
             .AddSingleton<DiscordSocketClient>()
             .AddSingleton(interactionConfig)
             .AddDbContext<ScrappyDbContext>(options =>
             {
+                var connectionString = DotNetEnv.Env.GetString("DB_CONNECTION_STRING");
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
             })
             .AddBotServices()
-            .AddBotHandlers();
+            .AddBotHandlers()
+            .AddRepositories();
 
         return services.BuildServiceProvider();
     }

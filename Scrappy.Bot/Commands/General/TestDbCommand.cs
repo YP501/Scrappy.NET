@@ -35,7 +35,6 @@ public class TestDbCommand : InteractionModuleBase<SocketInteractionContext>
                 GuildId = Context.Guild.Id,
                 Type = InfractionType.Kick,
                 IssuerId = Context.User.Id,
-                CaseId = "pluh"
             };
             await repo.AddInfractionAsync(infraction);
             

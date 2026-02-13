@@ -6,8 +6,8 @@ namespace Scrappy.Data.Repositories;
 
 public class InfractionRepository : IInfractionRepository
 {
-    private readonly ScrappyDbContext _dbContext;
-    public InfractionRepository(ScrappyDbContext dbContext)
+    private readonly BotDbContext _dbContext;
+    public InfractionRepository(BotDbContext dbContext)
     {
         _dbContext = dbContext;
     }

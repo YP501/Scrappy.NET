@@ -4,6 +4,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Scrappy.Bot.Interfaces;
+using Scrappy.Bot.Services;
 
 namespace Scrappy.Bot.Handlers;
 
@@ -13,14 +14,21 @@ public class InteractionHandler : IEventHandler
     private readonly InteractionService _interactions;
     private readonly IServiceProvider _services;
     private readonly IMemoryCache _cache;
+    private readonly LoggingService _logger;
 
-    public InteractionHandler(DiscordSocketClient client, InteractionService interactions, IServiceProvider services,
-        IMemoryCache cache)
+    public InteractionHandler(
+        DiscordSocketClient client,
+        InteractionService interactions,
+        IServiceProvider services,
+        IMemoryCache cache,
+        LoggingService logger
+        )
     {
         _client = client;
         _interactions = interactions;
         _services = services;
         _cache = cache;
+        _logger = logger;
     }
 
     public Task InitializeAsync()
@@ -35,7 +43,7 @@ public class InteractionHandler : IEventHandler
         if (interaction is SocketSlashCommand && IsOnCooldown(interaction.User.Id))
         {
             
-            // TODO: turn this in an embed and get cooldown time from global settings
+            // TODO: turn this in an embed and maybe add fetching cooldown from global config set by bot owner?
             await interaction.RespondAsync("Slow down! You can only run a command every 3 seconds");
             return;
         }
@@ -48,7 +56,7 @@ public class InteractionHandler : IEventHandler
     {
         if (result.IsSuccess || context.Interaction is SocketAutocompleteInteraction) return;
 
-        string userMessage = $"Something went wrong: {result.ErrorReason}";
+        const string userMessage = $"Something went wrong! Please contact <@513709333494628355>";
 
         try
         {
@@ -61,10 +69,10 @@ public class InteractionHandler : IEventHandler
                 await context.Interaction.RespondAsync(userMessage, ephemeral: true); // TODO: Replace with embed
             }
         }
-        catch (Exception ex)
+        catch
         {
             // This only happens if the interaction token expired or Discord is down
-            Console.WriteLine($"Could not notify user: {ex.Message}");
+            await _logger.LogAsync(new LogMessage(LogSeverity.Error, "InteractionHandler", "Couldn't notify user"));
         }
     }
 
@@ -73,7 +81,7 @@ public class InteractionHandler : IEventHandler
         string key = $"cd-{userId}";
         if (_cache.TryGetValue(key, out _)) return true;
 
-        // TODO: Get cooldown time from global settings
+        // TODO: Get cooldown time from global config
         _cache.Set(key, true, TimeSpan.FromSeconds(3)); 
         return false;
     }

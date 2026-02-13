@@ -13,7 +13,7 @@ namespace Scrappy.Bot.Commands.General;
 public class TestDbCommand : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly IServiceScopeFactory _scopeFactory;
-    
+
     public TestDbCommand(IServiceScopeFactory scopeFactory)
     {
         _scopeFactory = scopeFactory;
@@ -37,19 +37,20 @@ public class TestDbCommand : InteractionModuleBase<SocketInteractionContext>
                 IssuerId = Context.User.Id,
             };
             await repo.AddInfractionAsync(infraction);
-            
+
             await FollowupAsync("Success!");
         }
-        catch (DbUpdateException ex) when (ex.InnerException is MySqlException { Number: 1062 }) // Check for 1/99999999999 or something change for duplicate
+        catch (DbUpdateException ex) when
+            (ex.InnerException is MySqlException
+             {
+                 Number: 1062
+             }) // Check for 1/99999999999 or something change for duplicate
         {
-            await FollowupAsync("🤯 **GEFELICITEERD!** Je hebt zojuist de statistische loterij gewonnen. " +
-                                "Je hebt een CaseID gegenereerd die al bestond (kans van 1 op de triljoen). " +
-                                "Probeer het nog een keer, de kans dat dit twee keer achter elkaar gebeurt is letterlijk onmogelijk.");
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            await FollowupAsync("Something went wrong!");
+            await FollowupAsync("""
+                                🤯 CONGRATULATIONS! You just won the statistical lottery.
+                                You generated a CaseID that already exists (a one-in-a-trillion chance).
+                                Try again. The odds of this happening twice in a row are literally impossible.
+                                """);
         }
     }
 }

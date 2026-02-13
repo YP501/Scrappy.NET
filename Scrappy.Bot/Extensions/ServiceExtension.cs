@@ -19,6 +19,7 @@ public static class ServiceExtension
         ));
         services.AddSingleton<LoggingService>();
         services.AddSingleton<DiscordBotService>();
+        services.AddSingleton<GuildConfigService>();
         services.AddHttpClient();
         services.AddMemoryCache();
 
@@ -38,6 +39,7 @@ public static class ServiceExtension
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         services.AddScoped<IInfractionRepository, InfractionRepository>();
+        services.AddScoped<IGuildConfigRepository, GuildConfigRepository>();
 
         return services;
     }

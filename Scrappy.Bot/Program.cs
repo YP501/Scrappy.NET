@@ -8,19 +8,22 @@ using Scrappy.Bot.Services;
 using Scrappy.Data;
 
 namespace Scrappy.Bot;
+
 public static class Program
 {
     private static IServiceProvider? _serviceProvider;
+
     static IServiceProvider CreateProvider()
     {
-        // TODO: maybe set these up with global config
         var clientConfig = new DiscordSocketConfig
         {
             GatewayIntents = GatewayIntents.Guilds |
+                             GatewayIntents.GuildBans |
+                             GatewayIntents.GuildMembers |
                              GatewayIntents.GuildMessages |
-                             GatewayIntents.MessageContent |
-                             GatewayIntents.GuildMembers,
-            MessageCacheSize = 500
+                             GatewayIntents.MessageContent,
+            MessageCacheSize = 500,
+            AuditLogCacheSize = 0,
         };
         var interactionConfig = new InteractionServiceConfig()
         {
@@ -30,7 +33,7 @@ public static class Program
             .AddSingleton(clientConfig)
             .AddSingleton<DiscordSocketClient>()
             .AddSingleton(interactionConfig)
-            .AddDbContext<ScrappyDbContext>(options =>
+            .AddDbContext<BotDbContext>(options =>
             {
                 var connectionString = DotNetEnv.Env.GetString("DB_CONNECTION_STRING");
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
@@ -49,9 +52,9 @@ public static class Program
 
         // Load database
         using var scope = _serviceProvider.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ScrappyDbContext>();
+        var db = scope.ServiceProvider.GetRequiredService<BotDbContext>();
         await db.Database.MigrateAsync();
-        
+
         // Start bot
         var bot = _serviceProvider.GetRequiredService<DiscordBotService>();
         await bot.StartAsync();

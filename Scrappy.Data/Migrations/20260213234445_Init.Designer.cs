@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Scrappy.Data;
 
@@ -10,10 +11,12 @@ using Scrappy.Data;
 
 namespace Scrappy.Data.Migrations
 {
-    [DbContext(typeof(ScrappyDbContext))]
-    partial class ScrappyDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(BotDbContext))]
+    [Migration("20260213234445_Init")]
+    partial class Init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,38 @@ namespace Scrappy.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+
+            modelBuilder.Entity("Scrappy.Data.Models.GuildConfig", b =>
+                {
+                    b.Property<ulong>("GuildId")
+                        .HasColumnType("bigint unsigned");
+
+                    b.Property<ulong?>("AdminRoleId")
+                        .HasColumnType("bigint unsigned");
+
+                    b.Property<string>("AppealLink")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<ulong?>("LevelUpChannelId")
+                        .HasColumnType("bigint unsigned");
+
+                    b.Property<ulong?>("LogMessageEventChannelId")
+                        .HasColumnType("bigint unsigned");
+
+                    b.Property<ulong?>("LogModerationEventChannelId")
+                        .HasColumnType("bigint unsigned");
+
+                    b.Property<ulong?>("ModeratorRoleId")
+                        .HasColumnType("bigint unsigned");
+
+                    b.Property<ulong?>("WelcomeChannelId")
+                        .HasColumnType("bigint unsigned");
+
+                    b.HasKey("GuildId");
+
+                    b.ToTable("GuildConfigs");
+                });
 
             modelBuilder.Entity("Scrappy.Data.Models.Infraction", b =>
                 {
@@ -57,14 +92,25 @@ namespace Scrappy.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuildId");
-
-                    b.HasIndex("TargetId");
-
                     b.HasIndex("GuildId", "CaseId")
                         .IsUnique();
 
+                    b.HasIndex("GuildId", "IssuerId");
+
+                    b.HasIndex("GuildId", "TargetId");
+
                     b.ToTable("Infractions");
+                });
+
+            modelBuilder.Entity("Scrappy.Data.Models.Infraction", b =>
+                {
+                    b.HasOne("Scrappy.Data.Models.GuildConfig", "Guild")
+                        .WithMany()
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Guild");
                 });
 #pragma warning restore 612, 618
         }

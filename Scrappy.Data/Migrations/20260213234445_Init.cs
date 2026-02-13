@@ -16,6 +16,26 @@ namespace Scrappy.Data.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "GuildConfigs",
+                columns: table => new
+                {
+                    GuildId = table.Column<ulong>(type: "bigint unsigned", nullable: false),
+                    AppealLink = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    LogModerationEventChannelId = table.Column<ulong>(type: "bigint unsigned", nullable: true),
+                    LogMessageEventChannelId = table.Column<ulong>(type: "bigint unsigned", nullable: true),
+                    WelcomeChannelId = table.Column<ulong>(type: "bigint unsigned", nullable: true),
+                    LevelUpChannelId = table.Column<ulong>(type: "bigint unsigned", nullable: true),
+                    ModeratorRoleId = table.Column<ulong>(type: "bigint unsigned", nullable: true),
+                    AdminRoleId = table.Column<ulong>(type: "bigint unsigned", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GuildConfigs", x => x.GuildId);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "Infractions",
                 columns: table => new
                 {
@@ -34,13 +54,14 @@ namespace Scrappy.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Infractions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Infractions_GuildConfigs_GuildId",
+                        column: x => x.GuildId,
+                        principalTable: "GuildConfigs",
+                        principalColumn: "GuildId",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Infractions_GuildId",
-                table: "Infractions",
-                column: "GuildId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Infractions_GuildId_CaseId",
@@ -49,9 +70,14 @@ namespace Scrappy.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Infractions_TargetId",
+                name: "IX_Infractions_GuildId_IssuerId",
                 table: "Infractions",
-                column: "TargetId");
+                columns: new[] { "GuildId", "IssuerId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Infractions_GuildId_TargetId",
+                table: "Infractions",
+                columns: new[] { "GuildId", "TargetId" });
         }
 
         /// <inheritdoc />
@@ -59,6 +85,9 @@ namespace Scrappy.Data.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Infractions");
+
+            migrationBuilder.DropTable(
+                name: "GuildConfigs");
         }
     }
 }

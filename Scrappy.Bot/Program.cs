@@ -35,8 +35,15 @@ public static class Program
             .AddSingleton(interactionConfig)
             .AddDbContext<BotDbContext>(options =>
             {
-                var connectionString = DotNetEnv.Env.GetString("DB_CONNECTION_STRING");
-                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+                string connectionString = DotNetEnv.Env.GetString("DB_CONNECTION_STRING");
+                string dbVersion = DotNetEnv.Env.GetString("DB_VERSION");
+                options.UseMySql(connectionString, new MariaDbServerVersion(dbVersion), o =>
+                {
+                    o.EnableRetryOnFailure(
+                        maxRetryCount: 5,
+                        maxRetryDelay: TimeSpan.FromSeconds(10),
+                        errorNumbersToAdd: null);
+                });
             })
             .AddBotServices()
             .AddBotHandlers()
@@ -45,15 +52,20 @@ public static class Program
         return services.BuildServiceProvider();
     }
 
+    private static async Task ApplyDatabaseMigrationsAsync(IServiceProvider serviceProvider)
+    {
+        using var scope = serviceProvider.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<BotDbContext>();
+        await db.Database.MigrateAsync();
+    }
+
     public static async Task Main()
     {
         DotNetEnv.Env.TraversePath().Load();
         _serviceProvider = CreateProvider();
 
-        // Load database
-        using var scope = _serviceProvider.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<BotDbContext>();
-        await db.Database.MigrateAsync();
+        // Update database tables with migrations
+        await ApplyDatabaseMigrationsAsync(_serviceProvider);
 
         // Start bot
         var bot = _serviceProvider.GetRequiredService<DiscordBotService>();

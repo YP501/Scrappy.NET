@@ -12,7 +12,7 @@ using Scrappy.Data;
 namespace Scrappy.Data.Migrations
 {
     [DbContext(typeof(BotDbContext))]
-    [Migration("20260213234445_Init")]
+    [Migration("20260215211114_Init")]
     partial class Init
     {
         /// <inheritdoc />

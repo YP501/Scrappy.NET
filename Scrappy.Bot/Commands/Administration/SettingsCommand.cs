@@ -3,6 +3,7 @@ using Discord.Interactions;
 using Scrappy.Bot.Attributes;
 using Scrappy.Bot.Modals;
 using Scrappy.Bot.Services;
+using Scrappy.Data.Enums;
 
 namespace Scrappy.Bot.Commands.Administration;
 
@@ -16,9 +17,9 @@ public class SettingsCommand : InteractionModuleBase<SocketInteractionContext>
     }
 
     // Reply with modal
-    [SlashCommand("settings", "Change the settings of the bot for your server! Use `/settings` to set the role")]
-    [RequireModeratorRole]
+    [SlashCommand("settings", "Change the settings of the bot for your server")]
     [CommandContextType(InteractionContextType.Guild)]
+    [RequireMinimumPermission(PermissionLevel.Administrator)]
     public async Task ExecuteAsync()
     {
         // TODO: Remove this and implement correct [ModalChannelSelect] attribute when Discord.net stable 3.19.0 drops

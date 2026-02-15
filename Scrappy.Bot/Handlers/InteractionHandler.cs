@@ -56,7 +56,7 @@ public class InteractionHandler : IEventHandler
     {
         if (result.IsSuccess || context.Interaction is SocketAutocompleteInteraction) return;
 
-        const string userMessage = $"Something went wrong! Please contact <@513709333494628355>";
+        string userMessage = $"Error: {result.ErrorReason}";
 
         try
         {

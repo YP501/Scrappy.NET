@@ -13,7 +13,7 @@ public static class Program
 {
     private static IServiceProvider? _serviceProvider;
 
-    static IServiceProvider CreateProvider()
+    private static IServiceProvider CreateProvider()
     {
         var clientConfig = new DiscordSocketConfig
         {
@@ -59,12 +59,36 @@ public static class Program
         await db.Database.MigrateAsync();
     }
 
-    public static async Task Main()
+    private static void InitializeAndCheckEnvs()
     {
         DotNetEnv.Env.TraversePath().Load();
+        string[] requiredEnvs =
+        {
+            "DISCORD_TOKEN",
+            "DB_CONNECTION_STRING",
+            "DB_VERSION",
+        };
+
+        var missingEnvs = requiredEnvs.Where(env => string.IsNullOrEmpty(DotNetEnv.Env.GetString(env))).ToList();
+
+        if (missingEnvs.Any())
+        {
+            Console.WriteLine("Critical Error: Unknown configuration!");
+            missingEnvs.ForEach(env =>
+            {
+                Console.WriteLine($"     -> Missing env entry `{env}`");
+            });
+            Console.WriteLine("Make sure your .env file is complete and try again");
+            return;
+        }
+    }
+
+    public static async Task Main()
+    {
+        InitializeAndCheckEnvs();
         _serviceProvider = CreateProvider();
 
-        // Update database tables with migrations
+        // Update database tables with migrations in a scope to force proper disposal of DbContext
         await ApplyDatabaseMigrationsAsync(_serviceProvider);
 
         // Start bot

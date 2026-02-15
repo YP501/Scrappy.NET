@@ -44,7 +44,7 @@ public class InteractionHandler : IEventHandler
         {
             
             // TODO: turn this in an embed and maybe add fetching cooldown from global config set by bot owner?
-            await interaction.RespondAsync("Slow down! You can only run a command every 3 seconds");
+            await interaction.RespondAsync("Slow down! You can only run a command every 3 seconds", ephemeral: true);
             return;
         }
         

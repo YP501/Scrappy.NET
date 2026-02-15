@@ -19,7 +19,7 @@ public class SettingsCommand : InteractionModuleBase<SocketInteractionContext>
     // Reply with modal
     [SlashCommand("settings", "Change the settings of the bot for your server")]
     [CommandContextType(InteractionContextType.Guild)]
-    [RequireMinimumPermission(PermissionLevel.Administrator)]
+    [RequireMinimumPermission(PermissionLevel.ServerOwner)]
     public async Task ExecuteAsync()
     {
         // TODO: Remove this and implement correct [ModalChannelSelect] attribute when Discord.net stable 3.19.0 drops

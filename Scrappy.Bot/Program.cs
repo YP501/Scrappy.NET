@@ -74,10 +74,7 @@ public static class Program
         if (missingEnvs.Any())
         {
             Console.WriteLine("Critical Error: Unknown configuration!");
-            missingEnvs.ForEach(env =>
-            {
-                Console.WriteLine($"     -> Missing env entry `{env}`");
-            });
+            missingEnvs.ForEach(env => Console.WriteLine($"    -> Missing env entry `{env}`"));
             Console.WriteLine("Make sure your .env file is complete and try again");
             return;
         }

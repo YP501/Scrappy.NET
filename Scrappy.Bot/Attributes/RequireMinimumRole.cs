@@ -22,7 +22,7 @@ public class RequireMinimumPermissionAttribute : PreconditionAttribute
     {
         // Bot developer can execute stuff in DMs so we check him first before we cast to IGuildUser
         var botService = services.GetRequiredService<DiscordBotService>();
-        if (_requiredPermissionLevel == BotOwner && botService.DeveloperIds.Contains(context.User.Id))
+        if (_requiredPermissionLevel == BotDeveloper && botService.DeveloperIds.Contains(context.User.Id))
         {
             return  PreconditionResult.FromSuccess();
         }

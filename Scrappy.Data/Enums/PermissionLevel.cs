@@ -5,5 +5,5 @@ public enum PermissionLevel
     Moderator,
     Administrator,
     ServerOwner,
-    BotOwner
+    BotDeveloper
 }

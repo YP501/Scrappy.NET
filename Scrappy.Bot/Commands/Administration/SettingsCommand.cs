@@ -1,6 +1,7 @@
 using Discord;
 using Discord.Interactions;
 using Scrappy.Bot.Attributes;
+using Scrappy.Bot.Helpers;
 using Scrappy.Bot.Modals;
 using Scrappy.Bot.Services;
 using Scrappy.Data.Enums;
@@ -49,6 +50,8 @@ public class SettingsCommand : InteractionModuleBase<SocketInteractionContext>
         config.AppealLink = string.IsNullOrWhiteSpace(modal.AppealLink) ? null : modal.AppealLink;
 
         await _configService.UpdateConfigAsync(config);
-        await FollowupAsync("Settings saved successfully!"); // TODO: Embed this
+
+        var successEmbed = EmbedHelper.CreateSuccessEmbed("Settings updated!");
+        await FollowupAsync(embed: successEmbed, ephemeral: true);
     }
 }

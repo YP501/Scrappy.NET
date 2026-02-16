@@ -21,8 +21,8 @@ public class RequireMinimumPermissionAttribute : PreconditionAttribute
         ICommandInfo commandInfo, IServiceProvider services)
     {
         // Bot developer can execute stuff in DMs so we check him first before we cast to IGuildUser
-        var application = await context.Client.GetApplicationInfoAsync(); // TODO: cache this variable so we don't send http request every time
-        if (_requiredPermissionLevel == BotOwner && context.User.Id == application.Owner.Id)
+        var botService = services.GetRequiredService<DiscordBotService>();
+        if (_requiredPermissionLevel == BotOwner && botService.DeveloperIds.Contains(context.User.Id))
         {
             return  PreconditionResult.FromSuccess();
         }
@@ -39,7 +39,7 @@ public class RequireMinimumPermissionAttribute : PreconditionAttribute
         bool hasPermission = HasPermissionLevel(_requiredPermissionLevel, guildUser, config, context.Guild.OwnerId);
         return hasPermission
             ? PreconditionResult.FromSuccess()
-            : PreconditionResult.FromError($"You do not have permission to use that command! Required: {_requiredPermissionLevel}");
+            : PreconditionResult.FromError($"You don't have permission to use that! Required: {_requiredPermissionLevel}");
     }
     
     private static bool HasPermissionLevel(PermissionLevel required, IGuildUser user, GuildConfig config, ulong guildOwnerId)

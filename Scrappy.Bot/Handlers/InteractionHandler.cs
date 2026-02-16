@@ -3,6 +3,7 @@ using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
+using Scrappy.Bot.Helpers;
 using Scrappy.Bot.Interfaces;
 using Scrappy.Bot.Services;
 
@@ -37,14 +38,12 @@ public class InteractionHandler : IEventHandler
         _interactions.SlashCommandExecuted += HandleInteractionExecuted; // Error handling on interactions
         return Task.CompletedTask;
     }
-
     private async Task HandleInteractionCreated(SocketInteraction interaction)
     {
         if (interaction is SocketSlashCommand && IsOnCooldown(interaction.User.Id))
         {
-            
-            // TODO: turn this in an embed and maybe add fetching cooldown from global config set by bot owner?
-            await interaction.RespondAsync("Slow down! You can only run a command every 3 seconds", ephemeral: true);
+            var cooldownEmbed = EmbedHelper.CreateCooldownEmbed(3);
+            await interaction.RespondAsync(embed: cooldownEmbed, ephemeral: true);
             return;
         }
         
@@ -56,17 +55,17 @@ public class InteractionHandler : IEventHandler
     {
         if (result.IsSuccess || context.Interaction is SocketAutocompleteInteraction) return;
 
-        string userMessage = $"Error: {result.ErrorReason}";
-
         try
         {
             if (context.Interaction.HasResponded)
             {
-                await context.Interaction.FollowupAsync(userMessage, ephemeral: true); // TODO: Replace with embed
+                var errorEmbed = EmbedHelper.CreateErrorEmbed(result.ErrorReason);
+                await context.Interaction.FollowupAsync(embed: errorEmbed, ephemeral: true);
             }
             else
             {
-                await context.Interaction.RespondAsync(userMessage, ephemeral: true); // TODO: Replace with embed
+                var errorEmbed = EmbedHelper.CreateErrorEmbed(result.ErrorReason);
+                await context.Interaction.RespondAsync(embed: errorEmbed, ephemeral: true);
             }
         }
         catch
@@ -76,12 +75,16 @@ public class InteractionHandler : IEventHandler
         }
     }
 
-    private bool IsOnCooldown(ulong userId) // TODO: add bypass cooldown role check
+    private bool IsOnCooldown(ulong userId)
     {
+        // Bypass cooldown if you're a bot developer
+        var botService = _services.GetRequiredService<DiscordBotService>();
+        if (botService.DeveloperIds.Contains(userId)) return false;
+        
+        
         string key = $"cd-{userId}";
         if (_cache.TryGetValue(key, out _)) return true;
-
-        // TODO: Get cooldown time from global config
+        
         _cache.Set(key, true, TimeSpan.FromSeconds(3)); 
         return false;
     }

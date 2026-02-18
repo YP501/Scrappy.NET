@@ -6,9 +6,9 @@ using Discord.Interactions;
 
 namespace Scrappy.Bot.Commands.General;
 
-public class InfoCommand : InteractionModuleBase<SocketInteractionContext>
+public class AboutCommand : InteractionModuleBase<SocketInteractionContext>
 {
-    [SlashCommand("info", "Display some statistics for this bot, for nerds")]
+    [SlashCommand("about", "Display some statistics for this bot, for nerds")]
     public async Task ExecuteAsync()
     {
         // Get RAM usage
@@ -35,7 +35,7 @@ public class InfoCommand : InteractionModuleBase<SocketInteractionContext>
             .AddField("Runtime Info",
                 $"""
                  >>> OS: {osPlatform}
-                 Version:  {runtimeVersion}
+                 Runtime:  {runtimeVersion}
                  """)
             .AddField("Client Info",
                 $"""

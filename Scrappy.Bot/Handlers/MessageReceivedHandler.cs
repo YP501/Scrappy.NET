@@ -1,14 +1,17 @@
 using Discord;
 using Discord.WebSocket;
 using Scrappy.Bot.Interfaces;
+using Scrappy.Bot.Services;
 
 namespace Scrappy.Bot.Handlers;
 public class MessageReceivedHandler : IEventHandler
 {
     private readonly DiscordSocketClient _client;
-    public MessageReceivedHandler(DiscordSocketClient client)
+    private readonly LevelService _levelService;
+    public MessageReceivedHandler(DiscordSocketClient client, LevelService levelService)
     {
         _client = client;
+        _levelService = levelService;
     }
 
     public Task InitializeAsync()
@@ -19,9 +22,11 @@ public class MessageReceivedHandler : IEventHandler
 
     private Task OnMessageReceived(SocketMessage msg)
     {
-        if (msg.Author.Id == _client.CurrentUser.Id) return  Task.CompletedTask; // Stop if its own message
+        if (msg is SocketUserMessage userMessage)
+        {
+            _ =  _levelService.ProcessMessageXpAsync(userMessage); // Fire and forget
+        }
         
-        Console.WriteLine(msg.CleanContent);
         return Task.CompletedTask;
     }
 }

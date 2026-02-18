@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Scrappy.Data;
 
@@ -11,9 +12,11 @@ using Scrappy.Data;
 namespace Scrappy.Data.Migrations
 {
     [DbContext(typeof(BotDbContext))]
-    partial class BotDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260218175401_AddLevelUsers")]
+    partial class AddLevelUsers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -101,11 +104,11 @@ namespace Scrappy.Data.Migrations
 
             modelBuilder.Entity("Scrappy.Data.Models.LevelUser", b =>
                 {
-                    b.Property<ulong>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint unsigned");
+                        .HasColumnType("bigint");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<ulong>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<int>("CurrentLevel")
                         .HasColumnType("int");
@@ -136,17 +139,6 @@ namespace Scrappy.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Guild");
-                });
-
-            modelBuilder.Entity("Scrappy.Data.Models.LevelUser", b =>
-                {
-                    b.HasOne("Scrappy.Data.Models.GuildConfig", "GuildConfig")
-                        .WithMany()
-                        .HasForeignKey("GuildId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("GuildConfig");
                 });
 #pragma warning restore 612, 618
         }

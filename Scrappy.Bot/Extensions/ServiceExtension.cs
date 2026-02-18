@@ -20,6 +20,7 @@ public static class ServiceExtension
         services.AddSingleton<LoggingService>();
         services.AddSingleton<DiscordBotService>();
         services.AddSingleton<GuildConfigService>();
+        services.AddSingleton<LevelService>();
         services.AddHttpClient();
         services.AddMemoryCache();
 

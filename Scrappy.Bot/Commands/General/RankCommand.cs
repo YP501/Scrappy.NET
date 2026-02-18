@@ -84,9 +84,8 @@ public class RankCommand : InteractionModuleBase<SocketInteractionContext>
                 2 => "🥉",
                 _ => $"**{i + 1}.**"
             };
-
-            int level = LevelHelper.CalculateLevelForXp(user.TotalXp);
-            description += $"{prefix} {name} - Level {level} ({user.TotalXp} XP)\n";
+            
+            description += $"{prefix} {name} - Level {user.CurrentLevel} ({user.TotalXp} XP)\n";
         }
 
         embed.WithDescription(description);

@@ -56,7 +56,7 @@ public class RankCommand : InteractionModuleBase<SocketInteractionContext>
         [Summary("limit", "How many users do you want to see?")]
         [MinValue(1)] [MaxValue(25)] int limit = 10)
     {
-        var topUsers = await _levelService.GetTopUsersAsync(Context.Guild.Id, 10);
+        var topUsers = await _levelService.GetTopUsersAsync(Context.Guild.Id, limit);
 
         if (!topUsers.Any())
         {

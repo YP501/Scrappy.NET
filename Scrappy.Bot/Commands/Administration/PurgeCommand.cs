@@ -22,8 +22,6 @@ public class PurgeCommand : InteractionModuleBase<SocketInteractionContext>
 
     private async Task ExecutePurge(IEnumerable<IMessage> messages, string type)
     {
-        await DeferAsync(true);
-
         if (Context.Channel is not ITextChannel channel)
         {
             await FollowupAsync(embed: EmbedHelper.CreateErrorEmbed(
@@ -79,6 +77,7 @@ public class PurgeCommand : InteractionModuleBase<SocketInteractionContext>
 
     private async Task<IEnumerable<IMessage>> FetchFilteredMessages(int searchAmount, Func<IMessage, bool> filter)
     {
+        await DeferAsync(true);
         var messages = await Context.Channel.GetMessagesAsync(searchAmount).FlattenAsync();
         return messages.Where(filter).Take(searchAmount);
     }
@@ -150,6 +149,8 @@ public class PurgeCommand : InteractionModuleBase<SocketInteractionContext>
     public async Task PurgeUntilHere(IMessage targetMessage)
     {
         // Overwrite FetchFilteredMessages with own logic
+        await DeferAsync(true);
+        
         List<IMessage> allMessages = [targetMessage];
         var pagedMessages = Context.Channel.GetMessagesAsync(targetMessage, Direction.After);
         await foreach (var page in pagedMessages)

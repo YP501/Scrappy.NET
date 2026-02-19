@@ -23,33 +23,32 @@ public class RequireMinimumPermissionAttribute : PreconditionAttribute
         // Bot developer can execute stuff in DMs so we check him first before we cast to IGuildUser
         var botService = services.GetRequiredService<DiscordBotService>();
         if (_requiredPermissionLevel == BotDeveloper && botService.DeveloperIds.Contains(context.User.Id))
-        {
-            return  PreconditionResult.FromSuccess();
-        }
-        
+            return PreconditionResult.FromSuccess();
+
         var configService = services.GetRequiredService<GuildConfigService>();
         var config = await configService.GetOrAddConfigAsync(context.Guild.Id);
-        
+
         // Get user info
         if (context.User is not IGuildUser guildUser)
-        {
             return PreconditionResult.FromError("Could not verify guild user permissions!");
-        }
 
-        bool hasPermission = HasPermissionLevel(_requiredPermissionLevel, guildUser, config, context.Guild.OwnerId);
+        var hasPermission = HasPermissionLevel(_requiredPermissionLevel, guildUser, config, context.Guild.OwnerId);
         return hasPermission
             ? PreconditionResult.FromSuccess()
-            : PreconditionResult.FromError($"You don't have permission to use that! Required: {_requiredPermissionLevel}");
+            : PreconditionResult.FromError(
+                $"You don't have permission to use that! Required: {_requiredPermissionLevel}");
     }
-    
-    private static bool HasPermissionLevel(PermissionLevel required, IGuildUser user, GuildConfig config, ulong guildOwnerId)
+
+    private static bool HasPermissionLevel(PermissionLevel required, IGuildUser user, GuildConfig config,
+        ulong guildOwnerId)
     {
         // Server owner can do anything as long as it's not bot owner requirement
         if (user.Id == guildOwnerId)
             return true;
 
         // Admin permission
-        if ((config.AdminRoleId.HasValue && user.RoleIds.Contains(config.AdminRoleId.Value)) || user.GuildPermissions.Administrator)
+        if ((config.AdminRoleId.HasValue && user.RoleIds.Contains(config.AdminRoleId.Value)) ||
+            user.GuildPermissions.Administrator)
             return required <= Administrator;
 
         // Moderator permission
@@ -58,5 +57,4 @@ public class RequireMinimumPermissionAttribute : PreconditionAttribute
 
         return false;
     }
-
 }

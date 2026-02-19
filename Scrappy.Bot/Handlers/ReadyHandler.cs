@@ -11,8 +11,8 @@ public class ReadyHandler : IEventHandler
 {
     private readonly DiscordSocketClient _client;
     private readonly InteractionService _interactions;
-    private readonly IServiceProvider _services;
     private readonly LoggingService _logger;
+    private readonly IServiceProvider _services;
 
     public ReadyHandler(
         DiscordSocketClient client,
@@ -35,23 +35,21 @@ public class ReadyHandler : IEventHandler
     private async Task OnReadyAsync()
     {
         await _interactions.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
-        await _logger.LogAsync(new(
+        await _logger.LogAsync(new LogMessage(
             LogSeverity.Info,
             "Ready",
             $"Found {_interactions.Modules.Count} modules:"
         ));
 
         foreach (var module in _interactions.Modules)
-        {
-            await _logger.LogAsync(new(
+            await _logger.LogAsync(new LogMessage(
                 LogSeverity.Info,
                 "Ready",
                 module.Name
             ));
-        }
 
         await _interactions.RegisterCommandsToGuildAsync(928369763552464997); // Replace guild id through options later
-        await _logger.LogAsync(new(
+        await _logger.LogAsync(new LogMessage(
             LogSeverity.Info,
             "Ready",
             $"Commands uploaded and Bot is connected as {_client.CurrentUser.Username}"

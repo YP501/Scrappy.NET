@@ -1,4 +1,4 @@
 <Solution>
-  <Project Path="Scrappy.Bot\Scrappy.Bot.csproj" />
-  <Project Path="Scrappy.Data/Scrappy.Data.csproj" />
+    <Project Path="Scrappy.Bot\Scrappy.Bot.csproj"/>
+    <Project Path="Scrappy.Data/Scrappy.Data.csproj"/>
 </Solution>

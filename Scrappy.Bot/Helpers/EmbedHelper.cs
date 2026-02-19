@@ -11,6 +11,7 @@ public static class EmbedHelper
             .WithColor(Color.Red)
             .Build();
     }
+
     public static Embed CreateSuccessEmbed(string description)
     {
         return new EmbedBuilder()
@@ -35,5 +36,4 @@ public static class EmbedHelper
             .WithColor(Color.Orange)
             .Build();
     }
-
 }

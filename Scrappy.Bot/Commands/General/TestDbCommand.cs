@@ -3,7 +3,6 @@ using Discord.Interactions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MySqlConnector;
-using Scrappy.Data;
 using Scrappy.Data.Enums;
 using Scrappy.Data.Interfaces;
 using Scrappy.Data.Models;
@@ -34,7 +33,7 @@ public class TestDbCommand : InteractionModuleBase<SocketInteractionContext>
                 Reason = "Test",
                 GuildId = Context.Guild.Id,
                 Type = InfractionType.Kick,
-                IssuerId = Context.User.Id,
+                IssuerId = Context.User.Id
             };
             await repo.AddInfractionAsync(infraction);
 

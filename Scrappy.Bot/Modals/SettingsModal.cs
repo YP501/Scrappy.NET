@@ -1,16 +1,15 @@
-using Discord;
 using Discord.Interactions;
 
 namespace Scrappy.Bot.Modals;
 
 public class SettingsModal : IModal
 {
-    public string Title => "Server Settings";
-
     [InputLabel("Appeal link")]
     [RequiredInput(false)]
     [ModalTextInput("appeal_link", placeholder: "https://discord.gg/your_server", maxLength: 50)]
     public string? AppealLink { get; init; }
+
+    public string Title => "Server Settings";
 
 
     // TODO: Implement this when Discord.net 3.19.0 drops

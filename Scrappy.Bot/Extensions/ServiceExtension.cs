@@ -41,6 +41,7 @@ public static class ServiceExtension
     {
         services.AddScoped<IInfractionRepository, InfractionRepository>();
         services.AddScoped<IGuildConfigRepository, GuildConfigRepository>();
+        services.AddScoped<ILevelUserRepository, LevelUserRepository>();
 
         return services;
     }

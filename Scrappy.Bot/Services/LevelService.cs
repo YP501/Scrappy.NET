@@ -1,49 +1,44 @@
 using Discord;
 using Discord.Net;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Scrappy.Bot.Helpers;
-using Scrappy.Data;
+using Scrappy.Data.Interfaces;
 using Scrappy.Data.Models;
 
 namespace Scrappy.Bot.Services;
 
 public class LevelService
 {
-    private readonly IServiceProvider _serviceProvider;
     private readonly IMemoryCache _cache;
     private readonly GuildConfigService _guildConfigService;
     private readonly LoggingService _logger;
     private readonly Random _rng = new();
+    private readonly IServiceProvider _serviceProvider;
 
-    public LevelService(IServiceProvider serviceProvider, IMemoryCache cache, GuildConfigService guildConfigService, LoggingService logger)
+    public LevelService(IServiceProvider serviceProvider, IMemoryCache cache, GuildConfigService guildConfigService,
+        LoggingService logger)
     {
         _serviceProvider = serviceProvider;
         _cache = cache;
-        _guildConfigService =  guildConfigService;
+        _guildConfigService = guildConfigService;
         _logger = logger;
     }
 
     public async Task<LevelUser?> GetLevelUserAsync(ulong guildId, ulong userId)
     {
         using var scope = _serviceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<BotDbContext>();
+        var repository = scope.ServiceProvider.GetRequiredService<ILevelUserRepository>();
 
-        return await dbContext.LevelUsers.FirstOrDefaultAsync(u => u.UserId == userId && u.GuildId == guildId);
+        return await repository.GetLevelUserAsync(guildId, userId);
     }
 
     public async Task<List<LevelUser>> GetTopUsersAsync(ulong guildId, int limit)
     {
         using var scope = _serviceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<BotDbContext>();
-        
-        return await dbContext.LevelUsers
-            .Where(u => u.GuildId == guildId)
-            .OrderByDescending(u => u.TotalXp)
-            .Take(limit)
-            .AsNoTracking()
-            .ToListAsync();
+        var repository = scope.ServiceProvider.GetRequiredService<ILevelUserRepository>();
+
+        return await repository.GetTopUsersAsync(guildId, limit);
     }
 
     public async Task ProcessMessageXpAsync(IMessage message)
@@ -51,12 +46,12 @@ public class LevelService
         if (message.Author.IsBot || message.Author.IsWebhook ||
             message.Channel is not ITextChannel sentFromChannel) return;
 
-        ulong userId = message.Author.Id;
-        ulong guildId = sentFromChannel.GuildId;
+        var userId = message.Author.Id;
+        var guildId = sentFromChannel.GuildId;
 
 
         // We check if user is on XP cooldown
-        string cacheKey = $"xp-cd-{guildId}-{userId}";
+        var cacheKey = $"xp-cd-{guildId}-{userId}";
         if (_cache.TryGetValue(cacheKey, out _)) return;
 
         // TODO: Get cooldown from global bot config
@@ -64,63 +59,49 @@ public class LevelService
 
         // Database shenanigans
         using var scope = _serviceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<BotDbContext>();
+        var repository = scope.ServiceProvider.GetRequiredService<ILevelUserRepository>();
 
-        var levelUser = await dbContext.LevelUsers.FirstOrDefaultAsync(u => u.GuildId == guildId && u.UserId == userId);
+        var levelUser = await repository.GetLevelUserAsync(guildId, userId);
+        var isNew = false;
+
         if (levelUser == null)
         {
-            levelUser = new()
-            {
-                GuildId = guildId,
-                UserId = userId,
-                TotalXp = 0,
-                CurrentLevel = 0
-            };
-            dbContext.LevelUsers.Add(levelUser);
+            levelUser = new LevelUser { GuildId = guildId, UserId = userId, TotalXp = 0 };
+            isNew = true;
         }
 
-        // random number between 15 and 30. TODO: Replace lower and upper with global bot config
-        int xpToAdd = _rng.Next(15, 31);
-        levelUser.TotalXp += xpToAdd;
+        var oldLevel = LevelHelper.CalculateLevelForXp(levelUser.TotalXp);
+        levelUser.TotalXp += _rng.Next(15, 31);
+        var newLevel = LevelHelper.CalculateLevelForXp(levelUser.TotalXp);
 
-        int oldLevel = levelUser.CurrentLevel;
-        int newLevel = LevelHelper.CalculateLevelForXp(levelUser.TotalXp);
-
-        bool isLevelUp = newLevel > oldLevel;
-        if (isLevelUp)
-        {
-            levelUser.CurrentLevel = newLevel;
-        }
-        
-        // Try to save XP and if it fails, remove cooldown for user
         try
         {
-            await dbContext.SaveChangesAsync();
+            if (isNew)
+                await repository.AddLevelUserAsync(levelUser);
+            else
+                await repository.UpdateLevelUser(levelUser);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             _cache.Remove(cacheKey);
             await _logger.LogAsync(new LogMessage(LogSeverity.Error, "LevelService", e.Message));
             return;
         }
-        
+
         // Send message if level-up
-        if (isLevelUp)
+        if (newLevel > oldLevel)
         {
             var config = await _guildConfigService.GetOrAddConfigAsync(guildId);
-            ITextChannel targetChannel = sentFromChannel; // Fallback to where message got sent from
-            
+            var targetChannel = sentFromChannel; // Fallback to where message got sent from
+
             // Get level-up notification channel
             if (config.LevelUpChannelId.HasValue)
             {
                 var configuredChannel = await sentFromChannel.Guild.GetTextChannelAsync(config.LevelUpChannelId.Value);
-                if (configuredChannel != null)
-                {
-                    targetChannel = configuredChannel;
-                }
+                if (configuredChannel != null) targetChannel = configuredChannel;
             }
 
-            string levelUpMessage = $"🎉 {message.Author.Mention} leveled up to level {newLevel}! 🎉";
+            var levelUpMessage = $"🎉 {message.Author.Mention} leveled up to level {newLevel}! 🎉";
             try
             {
                 await targetChannel.SendMessageAsync(levelUpMessage);
@@ -128,8 +109,17 @@ public class LevelService
             catch (HttpException e)
             {
                 // Fallback to original channel if configured channel doesn't work
-                try { await sentFromChannel.SendMessageAsync(levelUpMessage); } catch {  /* give up */  }
+                try
+                {
+                    await sentFromChannel.SendMessageAsync(levelUpMessage);
+                }
+                catch
+                {
+                    /* give up */
+                }
             }
+
+            // TODO: Add automatic role adding based on achieved level
         }
     }
 }

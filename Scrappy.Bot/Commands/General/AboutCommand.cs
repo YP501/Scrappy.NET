@@ -13,16 +13,16 @@ public class AboutCommand : InteractionModuleBase<SocketInteractionContext>
     {
         // Get RAM usage
         var process = Process.GetCurrentProcess();
-        double ramUsageMb = process.WorkingSet64 / 1024.0 / 1024.0;
-        string ramUsageFormatted = ramUsageMb >= 1000
+        var ramUsageMb = process.WorkingSet64 / 1024.0 / 1024.0;
+        var ramUsageFormatted = ramUsageMb >= 1000
             ? $"{ramUsageMb / 1024.0:F2} GB"
             : $"{ramUsageMb:F1} MB";
 
         // Get other information things
-        string osPlatform = RuntimeInformation.OSDescription;
-        string runtimeVersion = RuntimeInformation.FrameworkDescription;
-        int loadedUsersAmount = Context.Client.Guilds.Sum(g => g.Users.Count);
-        int latency = Context.Client.Latency;
+        var osPlatform = RuntimeInformation.OSDescription;
+        var runtimeVersion = RuntimeInformation.FrameworkDescription;
+        var loadedUsersAmount = Context.Client.Guilds.Sum(g => g.Users.Count);
+        var latency = Context.Client.Latency;
 
         // Build epic embed
         var embed = new EmbedBuilder()
@@ -42,13 +42,13 @@ public class AboutCommand : InteractionModuleBase<SocketInteractionContext>
                  >>> **RAM Usage:** {ramUsageFormatted}
                  **Latency:** {latency}ms
                  **Users Loaded:** {loadedUsersAmount}
-                 """, inline: true)
+                 """, true)
             .AddField("Bot Info",
                 $"""
                  >>> **Uptime:** {GetUptime()}
                  **Version:** {GetCleanBotVersion()}
                  **Developer:** <@513709333494628355>
-                 """, inline: true)
+                 """, true)
             .Build();
 
         // Send embed
@@ -60,7 +60,7 @@ public class AboutCommand : InteractionModuleBase<SocketInteractionContext>
         var uptime = DateTime.Now - Process.GetCurrentProcess().StartTime;
         return $"{uptime.Days}d {uptime.Hours}h {uptime.Minutes}m {uptime.Seconds}s";
     }
-    
+
     private static string GetCleanBotVersion()
     {
         var version = Assembly.GetExecutingAssembly()

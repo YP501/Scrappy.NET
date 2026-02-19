@@ -6,8 +6,8 @@ namespace Scrappy.Bot.Commands.Fun;
 public class InsultCommand : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    
-    public  InsultCommand(IHttpClientFactory httpClientFactory)
+
+    public InsultCommand(IHttpClientFactory httpClientFactory)
     {
         _httpClientFactory = httpClientFactory;
     }
@@ -16,13 +16,14 @@ public class InsultCommand : InteractionModuleBase<SocketInteractionContext>
     public async Task ExecuteAsync()
     {
         await DeferAsync();
-        
+
         var httpClient = _httpClientFactory.CreateClient();
-        string jsonResponse = await httpClient.GetStringAsync("https://evilinsult.com/generate_insult.php?lang=en&type=json");
-        
+        var jsonResponse =
+            await httpClient.GetStringAsync("https://evilinsult.com/generate_insult.php?lang=en&type=json");
+
         var jsonNode = JsonNode.Parse(jsonResponse);
-        string insult = jsonNode?["insult"]?.GetValue<string>() ?? "sorry i'm to scared to insult you";
-        
+        var insult = jsonNode?["insult"]?.GetValue<string>() ?? "sorry i'm to scared to insult you";
+
         await FollowupAsync(insult);
     }
 }

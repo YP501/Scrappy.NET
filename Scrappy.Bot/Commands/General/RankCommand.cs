@@ -6,6 +6,7 @@ using Scrappy.Bot.Services;
 namespace Scrappy.Bot.Commands.General;
 
 [Group("rank", "All about user level rankings")]
+[CommandContextType(InteractionContextType.Guild)]
 public class RankCommand : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly LevelService _levelService;
@@ -26,17 +27,18 @@ public class RankCommand : InteractionModuleBase<SocketInteractionContext>
         if (stats == null)
         {
             await RespondAsync(
-                embed: EmbedHelper.CreateWarningEmbed($"{(targetUser.Id == Context.User.Id ? "You haven't" : $"{targetUser.Mention} hasn't")} earned any xp yet"),
+                embed: EmbedHelper.CreateWarningEmbed(
+                    $"{(targetUser.Id == Context.User.Id ? "You haven't" : $"{targetUser.Mention} hasn't")} earned any xp yet"),
                 ephemeral: true);
             return;
         }
 
-        int currentLevel = stats.CurrentLevel;
-        long currentXp = stats.TotalXp;
+        var currentXp = stats.TotalXp;
+        var currentLevel = LevelHelper.CalculateLevelForXp(currentXp);
 
-        long minXp = LevelHelper.GetRequiredXpForLevel(currentLevel);
-        long maxXp = LevelHelper.GetRequiredXpForLevel(currentLevel + 1);
-        string progressBar = LevelHelper.GetProgressBar(currentXp, currentLevel, 15);
+        var minXp = LevelHelper.GetRequiredXpForLevel(currentLevel);
+        var maxXp = LevelHelper.GetRequiredXpForLevel(currentLevel + 1);
+        var progressBar = LevelHelper.GetProgressBar(currentXp, currentLevel, 15);
 
         var embed = new EmbedBuilder()
             .WithTitle($"Rank Card - {targetUser.GlobalName ?? targetUser.Username}")
@@ -44,7 +46,7 @@ public class RankCommand : InteractionModuleBase<SocketInteractionContext>
             .AddField("Level", currentLevel, true)
             .AddField("Total XP", currentXp, true)
             .AddField($"Progress to level {currentLevel + 1}",
-                $"**{currentXp - minXp}** / **{maxXp - minXp}** XP\n{progressBar}", true)
+                $"**{currentXp - minXp}** / **{maxXp - minXp}** XP\n{progressBar}")
             .WithColor(Color.Purple)
             .Build();
 
@@ -52,15 +54,14 @@ public class RankCommand : InteractionModuleBase<SocketInteractionContext>
     }
 
     [SlashCommand("leaderboard", "View the top ranking users of this server")]
-    public async Task Leaderboard(
-        [Summary("limit", "How many users do you want to see?")]
-        [MinValue(1)] [MaxValue(25)] int limit = 10)
+    public async Task Leaderboard([MinValue(1)] [MaxValue(25)] int limit = 10)
     {
         var topUsers = await _levelService.GetTopUsersAsync(Context.Guild.Id, limit);
 
-        if (!topUsers.Any())
+        if (topUsers.Count == 0)
         {
-            await RespondAsync(embed: EmbedHelper.CreateWarningEmbed("No one has earned any XP yet. Start chatting!"),
+            await RespondAsync(
+                embed: EmbedHelper.CreateWarningEmbed("No one has earned any XP yet. Start chatting!"),
                 ephemeral: true);
             return;
         }
@@ -70,22 +71,23 @@ public class RankCommand : InteractionModuleBase<SocketInteractionContext>
             .WithThumbnailUrl(Context.Guild.IconUrl)
             .WithColor(Color.Purple);
 
-        string description = "";
-        for (int i = 0; i < topUsers.Count; i++)
+        var description = "";
+        for (var i = 0; i < topUsers.Count; i++)
         {
             var user = topUsers[i];
             var discordUser = Context.Guild.GetUser(user.UserId);
-            string name = discordUser?.GlobalName ?? discordUser?.Username ?? "Unknown User";
+            var name = discordUser?.GlobalName ?? discordUser?.Username ?? "Unknown User";
 
-            string prefix = i switch
+            var prefix = i switch
             {
                 0 => "🥇",
                 1 => "🥈",
                 2 => "🥉",
                 _ => $"**{i + 1}.**"
             };
-            
-            description += $"{prefix} {name} - Level {user.CurrentLevel} ({user.TotalXp} XP)\n";
+
+            description +=
+                $"{prefix} {name} - Level {LevelHelper.CalculateLevelForXp(user.TotalXp)} ({user.TotalXp} XP)\n";
         }
 
         embed.WithDescription(description);

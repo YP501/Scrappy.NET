@@ -1,9 +1,10 @@
-﻿using Scrappy.Bot.Extensions;
-using Discord;
+﻿using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Scrappy.Bot.Extensions;
 using Scrappy.Bot.Services;
 using Scrappy.Data;
 
@@ -23,11 +24,11 @@ public static class Program
                              GatewayIntents.GuildMessages |
                              GatewayIntents.MessageContent,
             MessageCacheSize = 500,
-            AuditLogCacheSize = 0,
+            AuditLogCacheSize = 0
         };
-        var interactionConfig = new InteractionServiceConfig()
+        var interactionConfig = new InteractionServiceConfig
         {
-            LogLevel = LogSeverity.Info,
+            LogLevel = LogSeverity.Info
         };
         var services = new ServiceCollection()
             .AddSingleton(clientConfig)
@@ -35,14 +36,14 @@ public static class Program
             .AddSingleton(interactionConfig)
             .AddDbContext<BotDbContext>(options =>
             {
-                string connectionString = DotNetEnv.Env.GetString("DB_CONNECTION_STRING");
-                string dbVersion = DotNetEnv.Env.GetString("DB_VERSION");
+                var connectionString = Env.GetString("DB_CONNECTION_STRING");
+                var dbVersion = Env.GetString("DB_VERSION");
                 options.UseMySql(connectionString, new MariaDbServerVersion(dbVersion), o =>
                 {
                     o.EnableRetryOnFailure(
-                        maxRetryCount: 5,
-                        maxRetryDelay: TimeSpan.FromSeconds(10),
-                        errorNumbersToAdd: null);
+                        5,
+                        TimeSpan.FromSeconds(10),
+                        null);
                 });
             })
             .AddBotServices()
@@ -61,22 +62,21 @@ public static class Program
 
     private static void InitializeAndCheckEnvs()
     {
-        DotNetEnv.Env.TraversePath().Load();
+        Env.TraversePath().Load();
         string[] requiredEnvs =
         {
             "DISCORD_TOKEN",
             "DB_CONNECTION_STRING",
-            "DB_VERSION",
+            "DB_VERSION"
         };
 
-        var missingEnvs = requiredEnvs.Where(env => string.IsNullOrEmpty(DotNetEnv.Env.GetString(env))).ToList();
+        var missingEnvs = requiredEnvs.Where(env => string.IsNullOrEmpty(Env.GetString(env))).ToList();
 
         if (missingEnvs.Any())
         {
             Console.WriteLine("Critical Error: Unknown configuration!");
             missingEnvs.ForEach(env => Console.WriteLine($"    -> Missing env entry `{env}`"));
             Console.WriteLine("Make sure your .env file is complete and try again");
-            return;
         }
     }
 

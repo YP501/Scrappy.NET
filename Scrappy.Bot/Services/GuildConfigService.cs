@@ -7,8 +7,8 @@ namespace Scrappy.Bot.Services;
 
 public class GuildConfigService
 {
-    private readonly IServiceScopeFactory _scopeFactory;
     private readonly ConcurrentDictionary<ulong, GuildConfig> _cache = new();
+    private readonly IServiceScopeFactory _scopeFactory;
 
     public GuildConfigService(IServiceScopeFactory scopeFactory)
     {
@@ -18,11 +18,8 @@ public class GuildConfigService
     public async Task<GuildConfig> GetOrAddConfigAsync(ulong guildId)
     {
         // Check if we already have a cached config
-        if (_cache.TryGetValue(guildId, out var cachedConfig))
-        {
-            return cachedConfig;
-        }
-        
+        if (_cache.TryGetValue(guildId, out var cachedConfig)) return cachedConfig;
+
         // Not in cache so we fetch from DB
         using var scope = _scopeFactory.CreateScope();
         var repository = scope.ServiceProvider.GetRequiredService<IGuildConfigRepository>();
@@ -33,19 +30,19 @@ public class GuildConfigService
             config = new GuildConfig { GuildId = guildId };
             await repository.AddConfigAsync(config);
         }
-        
+
         // Save config in cache and return it
         _cache[guildId] = config;
         return config;
     }
-    
+
     public async Task UpdateConfigAsync(GuildConfig config)
     {
         // Update in DB
         using var scope = _scopeFactory.CreateScope();
         var repository = scope.ServiceProvider.GetRequiredService<IGuildConfigRepository>();
-        await repository.SaveConfigAsync(config);
-        
+        await repository.UpdateConfigAsync(config);
+
         // Update cache
         _cache[config.GuildId] = config;
     }

@@ -8,7 +8,7 @@ public class PingCommand : InteractionModuleBase<SocketInteractionContext>
     [SlashCommand("ping", "Check the bot's latency")]
     public async Task ExecuteAsync()
     {
-        int latency = Context.Client.Latency;
+        var latency = Context.Client.Latency;
 
         var embed = new EmbedBuilder()
             .WithTitle("Pong! 🏓")
@@ -16,7 +16,7 @@ public class PingCommand : InteractionModuleBase<SocketInteractionContext>
             .WithColor(Color.Purple)
             .WithCurrentTimestamp()
             .Build();
-        
+
         await RespondAsync(embed: embed);
     }
 }

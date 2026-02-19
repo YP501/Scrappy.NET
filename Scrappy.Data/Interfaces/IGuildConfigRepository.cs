@@ -6,5 +6,5 @@ public interface IGuildConfigRepository
 {
     Task<GuildConfig?> GetConfigAsync(ulong guildId);
     Task AddConfigAsync(GuildConfig config);
-    Task SaveConfigAsync(GuildConfig config);
+    Task UpdateConfigAsync(GuildConfig config);
 }

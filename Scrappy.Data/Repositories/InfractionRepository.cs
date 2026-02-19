@@ -7,11 +7,12 @@ namespace Scrappy.Data.Repositories;
 public class InfractionRepository : IInfractionRepository
 {
     private readonly BotDbContext _dbContext;
+
     public InfractionRepository(BotDbContext dbContext)
     {
         _dbContext = dbContext;
     }
-    
+
     public async Task AddInfractionAsync(Infraction infraction)
     {
         _dbContext.Infractions.Add(infraction);
@@ -32,7 +33,7 @@ public class InfractionRepository : IInfractionRepository
     {
         var infraction = await _dbContext.Infractions
             .FirstOrDefaultAsync(i => i.GuildId == guildId && i.CaseId == caseId);
-        
+
         return infraction;
     }
 }

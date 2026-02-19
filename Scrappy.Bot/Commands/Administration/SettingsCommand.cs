@@ -43,7 +43,7 @@ public class SettingsCommand : InteractionModuleBase<SocketInteractionContext>
     [ModalInteraction("settings_modal")]
     public async Task HandleAsync(SettingsModal modal)
     {
-        await DeferAsync(ephemeral: true);
+        await DeferAsync(true);
 
         var config = await _configService.GetOrAddConfigAsync(Context.Guild.Id);
         // Update config values

@@ -11,11 +11,11 @@ namespace Scrappy.Bot.Handlers;
 
 public class InteractionHandler : IEventHandler
 {
+    private readonly IMemoryCache _cache;
     private readonly DiscordSocketClient _client;
     private readonly InteractionService _interactions;
-    private readonly IServiceProvider _services;
-    private readonly IMemoryCache _cache;
     private readonly LoggingService _logger;
+    private readonly IServiceProvider _services;
 
     public InteractionHandler(
         DiscordSocketClient client,
@@ -23,7 +23,7 @@ public class InteractionHandler : IEventHandler
         IServiceProvider services,
         IMemoryCache cache,
         LoggingService logger
-        )
+    )
     {
         _client = client;
         _interactions = interactions;
@@ -38,6 +38,7 @@ public class InteractionHandler : IEventHandler
         _interactions.SlashCommandExecuted += HandleInteractionExecuted; // Error handling on interactions
         return Task.CompletedTask;
     }
+
     private async Task HandleInteractionCreated(SocketInteraction interaction)
     {
         if (interaction is SocketSlashCommand && IsOnCooldown(interaction.User.Id))
@@ -46,7 +47,7 @@ public class InteractionHandler : IEventHandler
             await interaction.RespondAsync(embed: cooldownEmbed, ephemeral: true);
             return;
         }
-        
+
         var context = new SocketInteractionContext(_client, interaction);
         await _interactions.ExecuteCommandAsync(context, _services);
     }
@@ -80,12 +81,12 @@ public class InteractionHandler : IEventHandler
         // Bypass cooldown if you're a bot developer
         var botService = _services.GetRequiredService<DiscordBotService>();
         if (botService.DeveloperIds.Contains(userId)) return false;
-        
-        
-        string key = $"cd-{userId}";
+
+
+        var key = $"cd-{userId}";
         if (_cache.TryGetValue(key, out _)) return true;
-        
-        _cache.Set(key, true, TimeSpan.FromSeconds(3)); 
+
+        _cache.Set(key, true, TimeSpan.FromSeconds(3));
         return false;
     }
 }

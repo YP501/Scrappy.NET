@@ -20,22 +20,23 @@ public class SettingsCommand : InteractionModuleBase<SocketInteractionContext>
     // Reply with modal
     [SlashCommand("settings", "Change the settings of the bot for your server")]
     [CommandContextType(InteractionContextType.Guild)]
-    [RequireMinimumPermission(PermissionLevel.ServerOwner)]
+    [RequireMinimumPermission(PermissionLevel.BotDeveloper)]
     public async Task ExecuteAsync()
     {
-        // TODO: Remove this and implement correct [ModalChannelSelect] attribute when Discord.net stable 3.19.0 drops
-        await RespondAsync("Not implemented!");
-        return;
-
         var config = await _configService.GetOrAddConfigAsync(Context.Guild.Id);
+
+        // Fetch stuff needed with just the ulong ids
 
         // Pre-populate settings modal with already set settings
         var modal = new SettingsModal
         {
-            AppealLink = config.AppealLink
+            AppealLink = config.AppealLink,
+            LogChannel = config.LogModerationEventChannelId.HasValue
+                ? Context.Guild.GetChannel(config.LogModerationEventChannelId.Value)
+                : null,
         };
 
-        await Context.Interaction.RespondWithModalAsync<SettingsModal>("settings_modal", modal);
+        await Context.Interaction.RespondWithModalAsync("settings_modal", modal);
     }
 
 
@@ -45,9 +46,17 @@ public class SettingsCommand : InteractionModuleBase<SocketInteractionContext>
     {
         await DeferAsync(true);
 
-        var config = await _configService.GetOrAddConfigAsync(Context.Guild.Id);
+        // Verify modal response fields
+        if (modal.LogChannel is not ITextChannel)
+        {
+            await FollowupAsync(embed: EmbedHelper.CreateErrorEmbed("Please select a TEXT channel for the moderation logs."));
+            return;
+        }
+        
         // Update config values
+        var config = await _configService.GetOrAddConfigAsync(Context.Guild.Id);
         config.AppealLink = string.IsNullOrWhiteSpace(modal.AppealLink) ? null : modal.AppealLink;
+        config.LogModerationEventChannelId = modal.LogChannel?.Id;
 
         await _configService.UpdateConfigAsync(config);
 

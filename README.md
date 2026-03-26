@@ -1,5 +1,7 @@
 # Scrappy.NET - The C# Rewrite of Scrappy Bot
 
+[![License](https://img.shields.io/github/license/YP501/Scrappy.NET?style=flat-square)](LICENSE)
+
 > A modern, fully rewritten version of the original scrappy-bot  
 > Developed by [@YP501](https://github.com/YP501)
 

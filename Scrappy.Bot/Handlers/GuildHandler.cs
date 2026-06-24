@@ -4,12 +4,12 @@ using Scrappy.Bot.Services;
 
 namespace Scrappy.Bot.Handlers;
 
-public class LeftGuildHandler : IEventHandler
+public class GuildHandler : IEventHandler
 {
     private readonly DiscordSocketClient _client;
     private readonly GuildConfigService _configService;
 
-    public LeftGuildHandler(DiscordSocketClient client, GuildConfigService configService)
+    public GuildHandler(DiscordSocketClient client, GuildConfigService configService)
     {
         _client = client;
         _configService = configService;
@@ -18,6 +18,8 @@ public class LeftGuildHandler : IEventHandler
     public Task InitializeAsync()
     {
         _client.LeftGuild += OnLeftGuildAsync;
+        _client.JoinedGuild += OnJoinedGuildAsync;
+
         return Task.CompletedTask;
     }
 
@@ -25,5 +27,10 @@ public class LeftGuildHandler : IEventHandler
     {
         _configService.RemoveFromCache(guild.Id);
         return Task.CompletedTask;
+    }
+
+    private async Task OnJoinedGuildAsync(SocketGuild guild)
+    {
+        await _configService.GetOrAddConfigAsync(guild.Id);
     }
 }

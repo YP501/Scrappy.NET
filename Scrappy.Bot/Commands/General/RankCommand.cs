@@ -56,11 +56,13 @@ public class RankCommand : InteractionModuleBase<SocketInteractionContext>
     [SlashCommand("leaderboard", "View the top ranking users of this server")]
     public async Task Leaderboard([MinValue(1)] [MaxValue(25)] int limit = 10)
     {
+        await DeferAsync();
+
         var topUsers = await _levelService.GetTopUsersAsync(Context.Guild.Id, limit);
 
         if (topUsers.Count == 0)
         {
-            await RespondAsync(
+            await FollowupAsync(
                 embed: EmbedHelper.CreateWarningEmbed("No one has earned any XP yet. Start chatting!"),
                 ephemeral: true);
             return;
@@ -91,6 +93,6 @@ public class RankCommand : InteractionModuleBase<SocketInteractionContext>
         }
 
         embed.WithDescription(description);
-        await RespondAsync(embed: embed.Build());
+        await FollowupAsync(embed: embed.Build());
     }
 }

@@ -18,7 +18,8 @@ public class SettingsCommand : InteractionModuleBase<SocketInteractionContext>
     }
 
     // Reply with modal
-    [SlashCommand("settings", "Change the settings of the bot for your server")]
+    // RunMode.Async here because quering DB blocks thread and we cant use DeferAsync() because of replying with a Modal
+    [SlashCommand("settings", "Change the settings of the bot for your server", runMode: RunMode.Async)]
     [CommandContextType(InteractionContextType.Guild)]
     [RequireMinimumPermission(PermissionLevel.BotDeveloper)]
     public async Task ExecuteAsync()
@@ -49,10 +50,11 @@ public class SettingsCommand : InteractionModuleBase<SocketInteractionContext>
         // Verify modal response fields
         if (modal.LogChannel is not ITextChannel)
         {
-            await FollowupAsync(embed: EmbedHelper.CreateErrorEmbed("Please select a TEXT channel for the moderation logs."));
+            await FollowupAsync(
+                embed: EmbedHelper.CreateErrorEmbed("Please select a TEXT channel for the moderation logs."));
             return;
         }
-        
+
         // Update config values
         var config = await _configService.GetOrAddConfigAsync(Context.Guild.Id);
         config.AppealLink = string.IsNullOrWhiteSpace(modal.AppealLink) ? null : modal.AppealLink;

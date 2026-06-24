@@ -51,7 +51,7 @@ namespace Scrappy.Data.Migrations
 
                     b.HasKey("GuildId");
 
-                    b.ToTable("GuildConfigs");
+                    b.ToTable("GuildConfigs", (string)null);
                 });
 
             modelBuilder.Entity("Scrappy.Data.Models.Infraction", b =>
@@ -96,7 +96,7 @@ namespace Scrappy.Data.Migrations
 
                     b.HasIndex("GuildId", "TargetId");
 
-                    b.ToTable("Infractions");
+                    b.ToTable("Infractions", (string)null);
                 });
 
             modelBuilder.Entity("Scrappy.Data.Models.LevelUser", b =>
@@ -121,7 +121,7 @@ namespace Scrappy.Data.Migrations
                     b.HasIndex("GuildId", "UserId")
                         .IsUnique();
 
-                    b.ToTable("LevelUsers");
+                    b.ToTable("LevelUsers", (string)null);
                 });
 
             modelBuilder.Entity("Scrappy.Data.Models.Infraction", b =>

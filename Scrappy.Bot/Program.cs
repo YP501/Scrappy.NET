@@ -26,10 +26,11 @@ public static class Program
             MessageCacheSize = 500,
             AuditLogCacheSize = 0
         };
-        var interactionConfig = new InteractionServiceConfig
-        {
-            LogLevel = LogSeverity.Info
-        };
+
+        var configuration = new ConfigurationBuilder()
+            .AddDotNetEnv(".env", LoadOptions.TraversePath())
+            .Build();
+
         var services = new ServiceCollection()
             .AddSingleton(clientConfig)
             .AddSingleton<DiscordSocketClient>()
@@ -89,7 +90,7 @@ public static class Program
         await ApplyDatabaseMigrationsAsync(_serviceProvider);
 
         // Start bot
-        var bot = _serviceProvider.GetRequiredService<DiscordBotService>();
+        var bot = services.GetRequiredService<DiscordBotService>();
         await bot.StartAsync();
 
         // Keep running

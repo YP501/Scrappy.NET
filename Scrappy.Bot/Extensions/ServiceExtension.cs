@@ -1,9 +1,11 @@
 using Discord.Interactions;
 using Discord.WebSocket;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Scrappy.Bot.Handlers;
 using Scrappy.Bot.Interfaces;
 using Scrappy.Bot.Services;
+using Scrappy.Data.Extensions;
 using Scrappy.Data.Interfaces;
 using Scrappy.Data.Repositories;
 
@@ -11,37 +13,36 @@ namespace Scrappy.Bot.Extensions;
 
 public static class ServiceExtension
 {
-    public static IServiceCollection AddBotServices(this IServiceCollection services)
+    public static IServiceCollection AddBotInfrastructure(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        DiscordSocketConfig clientConfig)
     {
-        services.AddSingleton(x => new InteractionService(
-            x.GetRequiredService<DiscordSocketClient>(),
-            x.GetRequiredService<InteractionServiceConfig>()
-        ));
+        // Global Configuration
+        services.AddSingleton<IConfiguration>(configuration);
+
+        // Client & Interaction Config
+        services.AddSingleton<DiscordSocketClient>(_ => new DiscordSocketClient(clientConfig));
+        services.AddSingleton<InteractionService>(s => new InteractionService(s.GetRequiredService<DiscordSocketClient>()));
+
+        // Core Bot Services
         services.AddSingleton<LoggingService>();
         services.AddSingleton<DiscordBotService>();
         services.AddSingleton<GuildConfigService>();
         services.AddSingleton<LevelService>();
+
+        // .NET Utilities
         services.AddHttpClient();
         services.AddMemoryCache();
 
-        return services;
-    }
-
-    public static IServiceCollection AddBotHandlers(this IServiceCollection services)
-    {
-        services.AddSingleton<IEventHandler, ReadyHandler>();
-        services.AddSingleton<IEventHandler, MessageUpdatesHandler>();
-        services.AddSingleton<IEventHandler, MessageReceivedHandler>();
+        // Discord Event Handlers
+        services.AddSingleton<IEventHandler, GuildHandler>();
         services.AddSingleton<IEventHandler, InteractionHandler>();
+        services.AddSingleton<IEventHandler, MessageHandler>();
+        services.AddSingleton<IEventHandler, ReadyHandler>();
 
-        return services;
-    }
-
-    public static IServiceCollection AddRepositories(this IServiceCollection services)
-    {
-        services.AddScoped<IInfractionRepository, InfractionRepository>();
-        services.AddScoped<IGuildConfigRepository, GuildConfigRepository>();
-        services.AddScoped<ILevelUserRepository, LevelUserRepository>();
+        // Database Layer
+        services.AddDataServices(configuration);
 
         return services;
     }
